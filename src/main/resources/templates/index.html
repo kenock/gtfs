@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60">
+    <title>SL: Avg&aring;ngar inom 15 minuter</title>
+    <style>
+        /* Base styles (light mode) */
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 2rem; 
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .row-header {
+            grid-column: 1 / span 2;
+            margin-bottom: -1rem;
+        }
+        .stop-block { 
+            border: 1px solid #ccc; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            height: 100%;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+        
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .stop-block {
+            border-color: #444;
+            background-color: #1e1e1e;
+        }
+        .dark-mode h2, .dark-mode h3 {
+            color: #ffffff;
+        }
+        
+        .dark-mode {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+    </style>
+</head>
+<body th:classappend="${darkMode} ? 'dark-mode' : ''">
+    <h2>[ SL ] Avg&aring;ngar inom 15 minuter</h2>
+    <div class="grid-container">
+        <!-- Reports are displayed in a 2x2 grid layout -->
+        <!-- First row -->
+        <h3 class="row-header">[ Tv&auml;rbanan ] H&aring;llplats: &Aring;rstadal</h3>
+        <div class="stop-block" th:if="${reports.size() > 0}" th:utext="${reports[0]}"></div>
+        <div class="stop-block" th:if="${reports.size() > 1}" th:utext="${reports[1]}"></div>
+        <!-- Second row -->
+        <h3 class="row-header">[ Buss 134 ] H&aring;llplats: Sj&ouml;vikstorget</h3>
+        <div class="stop-block" th:if="${reports.size() > 2}" th:utext="${reports[2]}"></div>
+        <div class="stop-block" th:if="${reports.size() > 3}" th:utext="${reports[3]}"></div>
+    </div>
+</body>
+</html>
