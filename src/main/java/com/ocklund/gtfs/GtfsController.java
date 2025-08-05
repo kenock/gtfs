@@ -23,10 +23,12 @@ public class GtfsController {
             @RequestParam(value = "darkMode", required = false, defaultValue = "false") boolean darkMode,
             Model model
     ) {
-        System.out.println("index(darkMode: " + darkMode + ", time: " + LocalDateTime.now() + ")");
+        LocalDateTime currentTime = LocalDateTime.now();
+        //System.out.println("index(darkMode: " + darkMode + ", time: " + currentTime + ")");
         List<String> reports = gtfsService.getStopReports();
         model.addAttribute("reports", reports);
         model.addAttribute("darkMode", darkMode);
+        model.addAttribute("currentTime", currentTime);
         return "index";
     }
 }

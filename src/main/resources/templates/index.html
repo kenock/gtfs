@@ -12,6 +12,14 @@
             padding: 2rem; 
             background-color: #ffffff;
             color: #000000;
+            position: relative;
+        }
+        .current-time {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
         .grid-container {
             display: grid;
@@ -42,7 +50,7 @@
             border-color: #444;
             background-color: #1e1e1e;
         }
-        .dark-mode h2, .dark-mode h3 {
+        .dark-mode h2, .dark-mode h3, .dark-mode .current-time {
             color: #ffffff;
         }
         
@@ -53,6 +61,7 @@
     </style>
 </head>
 <body th:classappend="${darkMode} ? 'dark-mode' : ''">
+    <div class="current-time" th:text="${#temporals.format(currentTime, 'HH:mm')}"></div>
     <h2>[ SL ] Avg&aring;ngar inom 15 minuter</h2>
     <div class="grid-container">
         <!-- Reports are displayed in a 2x2 grid layout -->
