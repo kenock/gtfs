@@ -1,6 +1,7 @@
 
 package com.ocklund.gtfs;
 
+import com.ocklund.gtfs.configuration.TimeProvider;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,15 @@ public class GtfsService {
     // Selected target stop ids from file routes.txt:
     // stop_id,stop_name,stop_lat,stop_lon,location_type,parent_station,platform_code
     // 9022001013905002,Sjövikstorget,59.307482,18.028621,0,9021001013905000,
-    private static final String STOP_ID_BUS_TO_LILJEHOLMEN = "9022001013905002";
+    static final String STOP_ID_BUS_TO_LILJEHOLMEN = "9022001013905002";
     // 9022001013905001,Sjövikstorget,59.307300,18.028835,0,9021001013905000,
-    private static final String STOP_ID_BUS_TO_OSTBERGAHOJDEN = "9022001013905001";
+    static final String STOP_ID_BUS_TO_OSTBERGAHOJDEN = "9022001013905001";
     // 9022001004513001,Årstadal,59.305943,18.025454,0,9021001004513000,1
-    private static final String STOP_ID_TRAM_FROM_LILJEHOLMEN = "9022001004513001";
+    static final String STOP_ID_TRAM_FROM_LILJEHOLMEN = "9022001004513001";
     // 9022001004513002,Årstadal,59.305707,18.025596,0,9021001004513000,2
-    private static final String STOP_ID_TRAM_TO_LILJEHOLMEN = "9022001004513002";
+    static final String STOP_ID_TRAM_TO_LILJEHOLMEN = "9022001004513002";
+
+    private final TimeProvider timeProvider;
 
     // Using LinkedHashSet to maintain insertion order for consistent quadrant display
     private static final Set<String> TARGET_STOP_IDS = new LinkedHashSet<>(
@@ -37,13 +40,38 @@ public class GtfsService {
                     STOP_ID_BUS_TO_LILJEHOLMEN           // Bottom-right: Liljeholmen
             )
     );
-    private final Map<String, Trip> tripsMap = new HashMap<>();
+    private Map<String, Trip> tripsMap = new HashMap<>();
     // Map to store scheduled stop times: key is stopId, value is a list of StopTime objects for that stop
-    private final Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
+    private Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
     // Map to store child-to-parent stop relationships: key is child stopId, value is parent stopId
     private final Map<String, String> childToParentMap = new HashMap<>();
     // Set to store active service IDs for the current date
-    private final Set<String> activeServiceIds = new HashSet<>();
+    private Set<String> activeServiceIds = new HashSet<>();
+
+    public GtfsService(TimeProvider timeProvider) {
+        this.timeProvider = timeProvider;
+    }
+
+    /**
+     * Package-private setter for tripsMap (used for testing)
+     */
+    void setTripsMap(Map<String, Trip> tripsMap) {
+        this.tripsMap = tripsMap;
+    }
+    
+    /**
+     * Package-private setter for stopTimesMap (used for testing)
+     */
+    void setStopTimesMap(Map<String, List<StopTime>> stopTimesMap) {
+        this.stopTimesMap = stopTimesMap;
+    }
+    
+    /**
+     * Package-private setter for activeServiceIds (used for testing)
+     */
+    void setActiveServiceIds(Set<String> activeServiceIds) {
+        this.activeServiceIds = activeServiceIds;
+    }
     
     private static final ZoneId STOCKHOLM_ZONE = ZoneId.of("Europe/Stockholm");
     private static final int TIME_WINDOW_MINUTES = 15;
@@ -130,7 +158,7 @@ public class GtfsService {
         return reports;
     }
 
-    private void loadStops() {
+    void loadStops() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new ClassPathResource("gtfs/stops.txt").getInputStream()))) {
             reader.readLine(); // header
@@ -152,7 +180,7 @@ public class GtfsService {
         }
     }
 
-    private void loadTrips() {
+    void loadTrips() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new ClassPathResource("gtfs/trips.txt").getInputStream()))) {
             reader.readLine(); // header
@@ -173,8 +201,8 @@ public class GtfsService {
      * Gets the current date and time in Stockholm time zone
      * @return The current LocalDateTime
      */
-    private LocalDateTime getCurrentDateTime() {
-        return LocalDateTime.now(STOCKHOLM_ZONE);
+    LocalDateTime getCurrentDateTime() {
+        return timeProvider.now(STOCKHOLM_ZONE);
     }
     
     /**
@@ -183,7 +211,7 @@ public class GtfsService {
      * @param gtfsTimeStr Time string in format "HH:MM:SS"
      * @return LocalDateTime object representing the time in Stockholm time zone
      */
-    private LocalDateTime parseGtfsTime(String gtfsTimeStr) {
+    LocalDateTime parseGtfsTime(String gtfsTimeStr) {
         String[] parts = gtfsTimeStr.split(":");
         if (parts.length != 3) {
             throw new IllegalArgumentException("Invalid GTFS time format: " + gtfsTimeStr);
@@ -209,7 +237,7 @@ public class GtfsService {
      * @param time The time to check
      * @return true if the time is outside the window, false otherwise
      */
-    private boolean isOutsideTimeWindow(LocalDateTime time) {
+    boolean isOutsideTimeWindow(LocalDateTime time) {
         // Get the current time
         LocalDateTime now = getCurrentDateTime();
         
@@ -223,7 +251,7 @@ public class GtfsService {
         return !time.isBefore(windowEnd) && !time.isEqual(windowEnd);
     }
     
-    private void loadStopTimes() {
+    void loadStopTimes() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new ClassPathResource("gtfs/stop_times_extracted.txt").getInputStream()))) {
             reader.readLine(); // header
@@ -265,7 +293,7 @@ public class GtfsService {
      * Loads calendar data from calendar.txt and calendar_dates.txt to determine
      * which services are active on the current date.
      */
-    private void loadCalendarData() {
+    void loadCalendarData() {
         // Format current date as YYYYMMDD for GTFS comparison
         String currentDateStr = getCurrentDateTime().toLocalDate().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         
