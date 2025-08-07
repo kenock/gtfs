@@ -6,6 +6,12 @@ for a set of hardcoded stops for the [SL](https://sl.se) public transportation.
 The public API (and personal key) for fetching the data is available at
 https://www.trafiklab.se
 
+## How to deploy
+
+A commit to main pushed to GitHub will trigger a deployment to [Render](https://render.com).
+
+The app is deployed at https://gtfs-4et1.onrender.com
+
 ## How to run
 
 ```
