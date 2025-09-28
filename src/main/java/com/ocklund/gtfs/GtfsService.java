@@ -92,15 +92,16 @@ public class GtfsService {
             // Display scheduled departures
             List<StopTime> scheduledTimes = stopTimesMap.get(stopId);
             if (scheduledTimes != null && !scheduledTimes.isEmpty()) {
-                // Sort by arrival time
-                scheduledTimes.sort(Comparator.comparing(StopTime::arrivalTime));
+                // Sort by arrival time, but avoid mutating the shared list to prevent ConcurrentModificationException
+                List<StopTime> timesCopy = new ArrayList<>(scheduledTimes);
+                timesCopy.sort(Comparator.comparing(StopTime::arrivalTime));
                 
                 boolean hasUpcomingDepartures = false;
                 
                 // Map to store one departure per minute (key is minute, value is the departure time)
                 Map<String, String> minuteToDepartureMap = new HashMap<>();
                 
-                for (StopTime stopTime : scheduledTimes) {
+                for (StopTime stopTime : timesCopy) {
                     // Check if this departure is within the time window
                     try {
                         LocalDateTime departureTime = parseGtfsTime(stopTime.departureTime());
