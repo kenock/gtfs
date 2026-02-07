@@ -29,6 +29,34 @@ Source:
 
 https://opendata.samtrafiken.se/gtfs/sl/sl.zip?key=YOUR_API_KEY
 
+Unzip the file to get all the files:
+```
+unzip sl.zip 
+Archive:  sl.zip
+  inflating: calendar_dates.txt      
+  inflating: booking_rules.txt       
+  inflating: stops.txt               
+  inflating: stop_times.txt          
+  inflating: feed_info.txt           
+  inflating: agency.txt              
+  inflating: shapes.txt              
+  inflating: trips.txt               
+  inflating: attributions.txt        
+  inflating: transfers.txt           
+  inflating: calendar.txt            
+  inflating: routes.txt
+```
+
+Only the following files are needed in the application:
+```
+calendar.txt            
+calendar_dates.txt      
+routes.txt
+stops.txt               
+stop_times.txt (should be replaced with stop_times_extracted.txt, see below)          
+trips.txt               
+```
+
 Since `stop_times.txt` in sl.zip is too big, a smaller
 file, `stop_times_extracted.txt` is created like this
 (only header, target stop ids and their parent stop ids):

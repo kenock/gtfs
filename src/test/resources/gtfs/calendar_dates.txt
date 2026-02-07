@@ -1,0 +1,3 @@
+service_id,date,exception_type
+SVC_ADD,20250806,1
+SVC_REMOVE,20250806,2
