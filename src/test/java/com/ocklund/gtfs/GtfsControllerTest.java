@@ -1,6 +1,7 @@
 package com.ocklund.gtfs;
 
 import com.ocklund.gtfs.configuration.TimeProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,10 @@ class GtfsControllerTest {
 
     @Mock
     private Model model;
-    
+
+    @Mock
+    private HttpServletResponse response;
+
     @BeforeEach
     void setUp() {
         controller = new GtfsController(gtfsService, timeProvider);
@@ -92,5 +96,21 @@ class GtfsControllerTest {
         ArgumentCaptor<LocalDateTime> timeCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         verify(model).addAttribute(eq("currentTime"), timeCaptor.capture());
         assertInstanceOf(LocalDateTime.class, timeCaptor.getValue(), "Current time should be a LocalDateTime");
+    }
+
+    @Test
+    void departures_shouldRenderFragmentAndDisableCaching() {
+        List<String> mockReports = Arrays.asList("Report 1", "Report 2", "Report 3", "Report 4");
+        LocalDateTime mockTime = LocalDateTime.of(2025, 8, 7, 12, 36);
+        when(gtfsService.getStopReports()).thenReturn(mockReports);
+        when(timeProvider.now(any(ZoneId.class))).thenReturn(mockTime);
+
+        String viewName = controller.departures(model, response);
+
+        assertEquals("index :: departures", viewName, "View name should be the departures fragment");
+        verify(model).addAttribute(eq("reports"), eq(mockReports));
+        verify(model).addAttribute(eq("currentTime"), eq(mockTime));
+        verify(timeProvider).now(eq(ZoneId.of("Europe/Stockholm")));
+        verify(response).setHeader(eq("Cache-Control"), eq("no-store"));
     }
 }
